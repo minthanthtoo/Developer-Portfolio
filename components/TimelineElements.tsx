@@ -45,7 +45,7 @@ export const YearBlock: React.FC<{
           className="absolute h-full flex items-start" 
           style={{ left: `${(parseInt(month) - 1) * MONTH_STEP}px` }}
         >
-          <div className="flex items-start gap-10">
+          <div className="flex items-start gap-16">
             {monthProjects.map(p => (
               <TimelineNode 
                 key={p.id} 
@@ -78,13 +78,22 @@ export const TimelineNode: React.FC<{
   const [isHovered, setIsHovered] = useState(false);
   const textColor = isLight ? 'text-slate-900' : 'text-white';
 
+  // Staggered layout based on tier
+  const isFlagship = project.tier === 'flagship';
+  const topOffset = isFlagship ? 10 : 90;
+  const iconSize = isFlagship ? 'lg' : 'md';
+  const connectorHeight = spineY - topOffset - (isFlagship ? 80 : 56);
+
   return (
-    <div ref={nodeRef} className="relative flex flex-col items-center shrink-0 w-[100px] h-full">
-      {/* App Icon above the line */}
-      <div className="absolute top-0 flex flex-col items-center w-full pt-6">
+    <div ref={nodeRef} className="relative flex flex-col items-center shrink-0 w-[120px] h-full">
+      {/* App Icon at staggered height */}
+      <div 
+        style={{ top: `${topOffset}px` }}
+        className="absolute flex flex-col items-center w-full"
+      >
         <AppIcon 
           project={project} 
-          size="lg" 
+          size={iconSize} 
           showLabel={false} 
           isLight={isLight} 
           onClick={onSelect} 
@@ -93,9 +102,9 @@ export const TimelineNode: React.FC<{
           mousePos={mouseX}
           axis="x"
         />
-        {/* Short Connector */}
+        {/* Dynamic Connector */}
         <div 
-          style={{ height: `${spineY - 120}px` }}
+          style={{ height: `${connectorHeight}px` }}
           className={`w-[1px] border-l ${isLight ? 'border-slate-300' : 'border-white/10'} mt-2 transition-all duration-500 ${isHovered ? 'border-emerald-500/50' : ''}`} 
         />
       </div>
@@ -123,9 +132,10 @@ export const TimelineNode: React.FC<{
         style={{ top: `${spineY + 16}px` }}
         className="absolute flex flex-col items-center pointer-events-none text-center w-max max-w-[140px] z-40"
       >
-        <h3 className={`text-[13px] font-serif italic tracking-tight transition-all leading-none ${isHovered ? 'opacity-100' : 'opacity-40'} ${textColor}`}>
+        <h3 className={`text-[12px] font-serif italic tracking-tight transition-all leading-none ${isHovered ? 'opacity-100' : 'opacity-40'} ${textColor}`}>
           {project.title}
         </h3>
+        {isFlagship && <div className="w-1 h-1 rounded-full bg-emerald-500 mt-1 opacity-40" />}
       </div>
 
       <AnimatePresence>
@@ -134,7 +144,7 @@ export const TimelineNode: React.FC<{
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 5 }}
-            style={{ top: `${spineY + 45}px` }} 
+            style={{ top: `${spineY + 50}px` }} 
             className="absolute w-full flex justify-center z-[100]"
           >
              <ProjectHUD project={project} isLight={isLight} />

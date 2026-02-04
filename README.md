@@ -1,34 +1,20 @@
-# Nexus Portfolio Gallery
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+</div>
 
-This project is ready to deploy on [Render](https://render.com/) as a static site.
+# Run and deploy your AI Studio app
 
-## Local development
+This contains everything you need to run your app locally.
+
+View your app in AI Studio: https://ai.studio/apps/drive/1LDR44EJkG5gYnJn2ekcyjRqvOuYEgHaf
+
+## Run Locally
+
+**Prerequisites:**  Node.js
+
 
 1. Install dependencies:
    `npm install`
-2. Run the dev server:
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
    `npm run dev`
-
-## Deploy on Render (Git push workflow)
-
-1. Create an empty GitHub repo.
-2. From this folder, run:
-   ```bash
-   git init
-   git branch -M main
-   git add .
-   git commit -m "Prepare for Render deploy"
-   git remote add origin <YOUR_GITHUB_REPO_URL>
-   git push -u origin main
-   ```
-3. In Render, click **New +** -> **Blueprint**.
-4. Select your GitHub repo and deploy.
-
-Render will use `render.yaml`:
-- Build command: `npm ci && npm run build`
-- Publish directory: `dist`
-- SPA rewrite: `/* -> /index.html`
-
-## Notes
-
-- If you use any runtime/build secrets later, add them in Render under **Environment**.

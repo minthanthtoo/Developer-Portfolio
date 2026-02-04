@@ -9,14 +9,14 @@ export interface TimelineProgress {
 }
 
 /**
- * Tracks scroll progress and item visibility for a horizontal timeline.
+ * Tracks scroll progress and item visibility for a horizontal timeline or vertical grid.
  * Ensures all indices are 1-based for UI display.
  */
-// Added React to imports to resolve namespace errors for RefObject and MutableRefObject
 export const useTimelineProgress = (
   containerRef: React.RefObject<HTMLDivElement | null>,
   nodeRefs: React.MutableRefObject<Map<string, HTMLDivElement>>,
-  sortedIds: string[]
+  sortedIds: string[],
+  isVertical: boolean = false
 ): TimelineProgress => {
   const [stats, setStats] = useState<TimelineProgress>({
     total: 0,
@@ -28,9 +28,9 @@ export const useTimelineProgress = (
   const frameId = useRef<number | null>(null);
 
   const updateProgress = useCallback(() => {
-    const container = containerRef.current;
+    // If tracking window scroll for vertical grid
+    const container = isVertical ? document.documentElement : containerRef.current;
     
-    // Handle empty state gracefully
     if (!container || sortedIds.length === 0) {
       setStats({
         total: 0,
@@ -41,14 +41,27 @@ export const useTimelineProgress = (
       return;
     }
 
-    const { scrollLeft, scrollWidth, clientWidth } = container;
+    const { 
+      scrollLeft, scrollTop, 
+      scrollWidth, scrollHeight, 
+      clientWidth, clientHeight 
+    } = isVertical ? {
+      scrollLeft: window.scrollX,
+      scrollTop: window.scrollY,
+      scrollWidth: document.documentElement.scrollWidth,
+      scrollHeight: document.documentElement.scrollHeight,
+      clientWidth: window.innerWidth,
+      clientHeight: window.innerHeight
+    } : container as HTMLDivElement;
     
-    // 1. Calculate Scroll Progress (Percentage of scrollable area)
-    const maxScroll = scrollWidth - clientWidth;
-    const progress = maxScroll > 0 ? (scrollLeft / maxScroll) * 100 : 0;
+    const currScroll = isVertical ? scrollTop : scrollLeft;
+    const maxScroll = (isVertical ? scrollHeight : scrollWidth) - (isVertical ? clientHeight : clientWidth);
+    const progress = maxScroll > 0 ? (currScroll / maxScroll) * 100 : 0;
 
-    // 2. Identification Logic
-    const containerCenter = scrollLeft + clientWidth / 2;
+    const viewportStart = currScroll;
+    const viewportEnd = currScroll + (isVertical ? clientHeight : clientWidth);
+    const viewportCenter = currScroll + (isVertical ? clientHeight : clientWidth) / 2;
+
     let firstVisible = -1;
     let lastVisible = -1;
     let minDistance = Infinity;
@@ -58,30 +71,27 @@ export const useTimelineProgress = (
       const node = nodeRefs.current.get(id);
       if (!node) return;
 
-      // Accumulate offsets through the DOM tree until we reach the scroll container
-      // This is necessary because nodes are nested inside YearBlock containers
-      let offsetLeft = 0;
+      let offset = 0;
       let curr: HTMLElement | null = node;
-      while (curr && curr !== container) {
-        offsetLeft += curr.offsetLeft;
+      
+      // Accumulate offsets
+      while (curr && (!isVertical ? curr !== container : curr !== document.body)) {
+        offset += isVertical ? curr.offsetTop : curr.offsetLeft;
         curr = curr.offsetParent as HTMLElement;
       }
       
-      const nodeWidth = node.offsetWidth;
-      const nodeRight = offsetLeft + nodeWidth;
-      const nodeCenter = offsetLeft + (nodeWidth / 2);
+      const nodeSize = isVertical ? node.offsetHeight : node.offsetWidth;
+      const nodeEnd = offset + nodeSize;
+      const nodeCenter = offset + (nodeSize / 2);
 
-      // Determine visibility overlap with the current viewport [scrollLeft, scrollLeft + clientWidth]
-      const isVisible = nodeRight > scrollLeft && offsetLeft < scrollLeft + clientWidth;
+      const isVisible = nodeEnd > viewportStart && offset < viewportEnd;
 
       if (isVisible) {
-        // Capture first and last visible items using human-friendly 1-based index
         if (firstVisible === -1) firstVisible = index + 1;
         lastVisible = index + 1;
       }
 
-      // Find item closest to the visual center of the viewport
-      const distance = Math.abs(containerCenter - nodeCenter);
+      const distance = Math.abs(viewportCenter - nodeCenter);
       if (distance < minDistance) {
         minDistance = distance;
         centeredIdx = index + 1;
@@ -97,10 +107,10 @@ export const useTimelineProgress = (
       centeredIndex: centeredIdx,
       progress: Math.min(100, Math.max(0, progress)),
     });
-  }, [containerRef, nodeRefs, sortedIds]);
+  }, [containerRef, nodeRefs, sortedIds, isVertical]);
 
   useEffect(() => {
-    const container = containerRef.current;
+    const container = isVertical ? window : containerRef.current;
     if (!container) return;
 
     const onScroll = () => {
@@ -108,7 +118,6 @@ export const useTimelineProgress = (
       frameId.current = requestAnimationFrame(updateProgress);
     };
 
-    // Immediate calculation on mount or sortedIds change
     updateProgress();
 
     container.addEventListener('scroll', onScroll, { passive: true });
@@ -119,7 +128,7 @@ export const useTimelineProgress = (
       window.removeEventListener('resize', updateProgress);
       if (frameId.current) cancelAnimationFrame(frameId.current);
     };
-  }, [updateProgress, sortedIds]);
+  }, [updateProgress, sortedIds, isVertical]);
 
   return stats;
 };

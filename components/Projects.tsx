@@ -1,7 +1,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence, useSpring, useTransform, useMotionValue } from 'framer-motion';
-import { Microscope, Cpu as Processor, Zap, Database, Github, Terminal } from 'lucide-react';
+import { Microscope, Cpu as Processor, Zap, Database, Github, Terminal, Sparkles } from 'lucide-react';
 import { Project } from '../types';
 
 const MotionDiv = motion.div as any;
@@ -32,6 +32,7 @@ export const ProjectHUD: React.FC<{ project: Project; isLight: boolean }> = ({ p
         <div className="space-y-1">
           <h4 className={`text-xs font-black uppercase tracking-tight ${textColor}`}>{project.title}</h4>
           <p className={`text-[10px] italic font-light line-clamp-2 ${subTextColor}`}>{project.tagline}</p>
+          <p className={`text-[8px] font-mono font-black uppercase tracking-wider ${subTextColor}`}>DEPLOY: {project.deployTarget}</p>
         </div>
 
         <div className={`h-px w-full ${isLight ? 'bg-slate-100' : 'bg-white/10'}`} />
@@ -81,15 +82,22 @@ export const AppIcon: React.FC<{
     lg: 'w-16 h-16 md:w-20 md:h-20 rounded-2xl md:rounded-3xl'
   };
 
-  const getCategoryIcon = (cat: string, title: string) => {
+  const getCategoryIcon = (cat: string, title: string, origin?: string) => {
+    if (origin === 'Vibe-Coded') return <Sparkles size={size === 'sm' ? 20 : 28} strokeWidth={1.2} />;
+    
+    if (cat === 'CORE') return <Terminal size={size === 'sm' ? 20 : 28} strokeWidth={1.2} />;
+    if (cat === 'AI') return <Zap size={size === 'sm' ? 20 : 28} strokeWidth={1.2} />;
+    
     const t = title.toLowerCase();
     if (t.includes('bio') || t.includes('neural')) return <Microscope size={size === 'sm' ? 20 : 28} strokeWidth={1.2} />;
-    if (cat === 'CORE') return <Processor size={size === 'sm' ? 20 : 28} strokeWidth={1.2} />;
-    if (cat === 'AI') return <Zap size={size === 'sm' ? 20 : 28} strokeWidth={1.2} />;
+    
     if (cat === 'SaaS') return <Database size={size === 'sm' ? 20 : 28} strokeWidth={1.2} />;
     if (cat === 'OPEN') return <Github size={size === 'sm' ? 20 : 28} strokeWidth={1.2} />;
+    
     return <Terminal size={size === 'sm' ? 20 : 28} strokeWidth={1.2} />;
   };
+
+  const activeAccent = project.origin === 'Vibe-Coded' ? 'ring-pink-500 shadow-pink-500/50' : (project.category === 'SaaS' ? 'ring-cyan-400 shadow-cyan-500/50' : 'ring-emerald-500 shadow-emerald-500/50');
 
   return (
     <MotionDiv 
@@ -108,7 +116,7 @@ export const AppIcon: React.FC<{
     >
       <MotionDiv 
         layoutId={`app-icon-shape-${project.id}`}
-        className={`${iconSizes[size]} flex items-center justify-center relative overflow-hidden transition-all duration-300 border ${isLight ? 'border-slate-300' : 'border-white/20'} ${isActive ? 'ring-2 ring-emerald-500 scale-110 shadow-[0_0_20px_rgba(16,185,129,0.5)]' : 'group-hover:border-white/50'}`}
+        className={`${iconSizes[size]} flex items-center justify-center relative overflow-hidden transition-all duration-300 border ${isLight ? 'border-slate-300' : 'border-white/20'} ${isActive ? `ring-2 ${activeAccent} scale-110 shadow-[0_0_20px]` : 'group-hover:border-white/50'}`}
         style={{ 
           background: `linear-gradient(135deg, ${project.iconColor}EE, ${project.iconColor}99)`,
         }}
@@ -118,7 +126,7 @@ export const AppIcon: React.FC<{
           layoutId={`app-icon-graphic-${project.id}`}
           className="text-white drop-shadow-lg z-10 pointer-events-none"
         >
-          {getCategoryIcon(project.category, project.title)}
+          {getCategoryIcon(project.category, project.title, project.origin)}
         </MotionDiv>
       </MotionDiv>
       

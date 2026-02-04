@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: nexus-portfolio-gallery
+    name: min-thant-thoo
     runtime: static
     buildCommand: npm ci && npm run build
     staticPublishPath: dist
