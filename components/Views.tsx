@@ -14,6 +14,7 @@ const MotionImg = motion.img as any;
 // Fast transition for detail views
 const FAST_TRANSITION = { type: "spring", damping: 30, stiffness: 500, mass: 0.5 };
 const IMAGE_TRANSITION = { duration: 0.4, ease: [0.16, 1, 0.3, 1] };
+const FEATURED_PROJECT_IDS = new Set(['myango', 'myangrow', 'tb-calendar']);
 
 export const GridView: React.FC<{ projects: Project[]; isLight: boolean; onSelect: (id: string) => void; nodeRefs?: React.MutableRefObject<Map<string, HTMLDivElement>> }> = ({ projects, isLight, onSelect, nodeRefs }) => {
   return (
@@ -37,6 +38,7 @@ export const GridView: React.FC<{ projects: Project[]; isLight: boolean; onSelec
 
 const ProjectGridCard: React.FC<{ project: Project; isLight: boolean; onSelect: (id: string) => void; delay: number; nodeRef?: (el: HTMLDivElement | null) => void }> = ({ project, isLight, onSelect, delay, nodeRef }) => {
   const isFlagship = project.tier === 'flagship';
+  const isFeatured = FEATURED_PROJECT_IDS.has(project.id);
   const borderColor = isLight ? 'border-slate-200 hover:border-emerald-500/50' : 'border-white/10 hover:border-emerald-500/50';
   const textColor = isLight ? 'text-slate-900' : 'text-white';
   const subTextColor = isLight ? 'text-slate-500' : 'text-white/40';
@@ -48,9 +50,9 @@ const ProjectGridCard: React.FC<{ project: Project; isLight: boolean; onSelect: 
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] }}
       onClick={() => onSelect(project.id)}
-      className={`group relative flex flex-col rounded-3xl border transition-all duration-500 cursor-pointer overflow-hidden ${isLight ? 'bg-white shadow-sm hover:shadow-2xl' : 'bg-white/5 hover:bg-white/10 shadow-2xl'} ${borderColor}`}
+      className={`group relative flex flex-col rounded-3xl border transition-all duration-500 cursor-pointer overflow-hidden ${isFeatured ? 'md:col-span-2 lg:col-span-2' : ''} ${isLight ? 'bg-white shadow-sm hover:shadow-2xl' : 'bg-white/5 hover:bg-white/10 shadow-2xl'} ${borderColor}` }
     >
-      <div className="aspect-[16/10] overflow-hidden relative">
+      <div className={`overflow-hidden relative ${isFeatured ? 'aspect-[21/10]' : 'aspect-[16/10]'}`}>
         <MotionImg 
           src={project.images[0]} 
           className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
@@ -59,6 +61,12 @@ const ProjectGridCard: React.FC<{ project: Project; isLight: boolean; onSelect: 
         
         {/* Tier Badge */}
         <div className="absolute top-4 left-4 z-20 flex gap-2">
+          {isFeatured && (
+            <span className="px-3 py-1 bg-cyan-400 text-black text-[9px] font-black uppercase tracking-widest rounded-full flex items-center gap-1.5 shadow-lg shadow-cyan-400/20">
+              <Sparkles size={10} />
+              Spotlight
+            </span>
+          )}
           {isFlagship && (
             <span className="px-3 py-1 bg-emerald-500 text-black text-[9px] font-black uppercase tracking-widest rounded-full flex items-center gap-1.5 shadow-lg shadow-emerald-500/20">
               <Award size={10} />
@@ -80,10 +88,10 @@ const ProjectGridCard: React.FC<{ project: Project; isLight: boolean; onSelect: 
             <span className={`text-[10px] font-mono font-black uppercase tracking-widest ${subTextColor}`}>{project.category}</span>
             <span className={`text-[10px] font-mono font-black ${subTextColor}`}>{project.year}</span>
           </div>
-          <h3 className={`text-xl sm:text-2xl font-serif italic tracking-tight ${textColor}`}>{project.title}</h3>
+          <h3 className={`${isFeatured ? 'text-2xl sm:text-3xl' : 'text-xl sm:text-2xl'} font-serif italic tracking-tight ${textColor}`}>{project.title}</h3>
         </div>
 
-        <p className={`text-xs sm:text-sm leading-relaxed line-clamp-2 ${subTextColor}`}>{project.description}</p>
+        <p className={`text-xs sm:text-sm leading-relaxed ${isFeatured ? 'line-clamp-3' : 'line-clamp-2'} ${subTextColor}`}>{project.description}</p>
 
         <div className="flex flex-wrap gap-2">
           <span className={`px-2 py-1 rounded-md border text-[8px] font-mono font-black uppercase ${isLight ? 'border-slate-200 text-slate-600 bg-slate-50' : 'border-white/15 text-white/65 bg-white/5'}`}>
@@ -117,6 +125,7 @@ const ProjectGridCard: React.FC<{ project: Project; isLight: boolean; onSelect: 
 };
 
 export const ProfileContent: React.FC<{ onClose: () => void; isLight: boolean }> = ({ onClose, isLight }) => {
+  const [avatarFailed, setAvatarFailed] = useState(false);
   const textColor = isLight ? 'text-slate-900' : 'text-white';
   const subTextColor = isLight ? 'text-slate-500' : 'text-white/40';
   const borderCol = isLight ? 'border-slate-300' : 'border-white/10';
@@ -142,23 +151,34 @@ export const ProfileContent: React.FC<{ onClose: () => void; isLight: boolean }>
         <div className="flex flex-col md:flex-row gap-12 items-center md:items-start">
           <div className={`w-32 h-32 md:w-44 md:h-44 rounded-3xl border ${borderCol} p-2 bg-gradient-to-br from-emerald-500/10 to-transparent shrink-0`}>
             <div className={`w-full h-full rounded-2xl ${isLight ? 'bg-slate-100' : 'bg-black'} flex items-center justify-center relative overflow-hidden`}>
-              <Binary size={48} className="text-emerald-500/20" />
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-emerald-500/10 to-transparent h-full w-full animate-scan" />
+              {!avatarFailed ? (
+                <img
+                  src="/profile/min-thant-htoo.png"
+                  alt="Min Thant Htoo"
+                  className="w-full h-full object-cover object-[center_20%]"
+                  onError={() => setAvatarFailed(true)}
+                />
+              ) : (
+                <>
+                  <Binary size={48} className="text-emerald-500/20" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-emerald-500/10 to-transparent h-full w-full animate-scan" />
+                </>
+              )}
             </div>
           </div>
           
           <div className="flex flex-col gap-8 flex-1 text-center md:text-left">
             <div className="space-y-3">
-              <h1 className={`text-4xl md:text-6xl font-black uppercase tracking-tight ${textColor}`}>ALEX_NEXUS</h1>
+              <h1 className={`text-4xl md:text-6xl font-black uppercase tracking-tight ${textColor}`}>Min Thant Htoo</h1>
               <div className="flex items-center justify-center md:justify-start gap-3 text-emerald-500 font-mono text-[10px] font-bold tracking-widest">
                 <span>SYSTEMS_ENGINEER</span>
                 <span className="opacity-20">/</span>
-                <span>APPLIED_AI_ARCHITECT</span>
+                <span>CROSS_INDUSTRY_BUILDER</span>
               </div>
             </div>
             
             <p className={`text-base md:text-xl font-serif italic leading-relaxed opacity-80 ${textColor}`}>
-              "Building the infrastructure layer where real-world systems meet machine intelligence. From Digital Signal Processing to Agentic Orchestration — engineering with mathematical rigor and production-ready scale."
+              "Building cross-industry products across medicine, agriculture, fintech, and education, then scaling them with AI systems and practical GTM thinking from past marketing experience."
             </p>
 
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
@@ -175,9 +195,9 @@ export const ProfileContent: React.FC<{ onClose: () => void; isLight: boolean }>
               <span className={`text-[11px] font-mono font-black uppercase tracking-widest ${subTextColor}`}>CORE_LOGIC</span>
             </div>
             <ul className={`space-y-4 text-sm font-medium ${textColor}`}>
-              <li className="flex items-start gap-3 opacity-70"><span className="text-emerald-500 font-mono font-black text-[10px]">01</span> High-availability LLM Routing & Infra Architecture</li>
-              <li className="flex items-start gap-3 opacity-70"><span className="text-emerald-500 font-mono font-black text-[10px]">02</span> Digital Signal Processing (DSP) & Curriculum Design</li>
-              <li className="flex items-start gap-3 opacity-70"><span className="text-emerald-500 font-mono font-black text-[10px]">03</span> Cultural Preservation & NLP Tooling for Unicode</li>
+              <li className="flex items-start gap-3 opacity-70"><span className="text-emerald-500 font-mono font-black text-[10px]">01</span> Cross-industry delivery: Medicine (TB operations), Agriculture intelligence, Fintech and Education apps</li>
+              <li className="flex items-start gap-3 opacity-70"><span className="text-emerald-500 font-mono font-black text-[10px]">02</span> Fullstack systems thinking: secure workflows, team collaboration, sync, and AI automation</li>
+              <li className="flex items-start gap-3 opacity-70"><span className="text-emerald-500 font-mono font-black text-[10px]">03</span> Past marketing background: positioning, campaign strategy, funnel optimization, and adoption</li>
             </ul>
           </div>
 
@@ -187,7 +207,7 @@ export const ProfileContent: React.FC<{ onClose: () => void; isLight: boolean }>
               <span className={`text-[11px] font-mono font-black uppercase tracking-widest ${subTextColor}`}>TECHNOLOGY_STACK</span>
             </div>
             <div className="flex flex-wrap gap-2">
-              {['Python / Asyncio', 'Docker', 'REST Infra', 'Agents / RL', 'PyTorch', 'DSP / STFT', 'Flutter Web', 'NLP / Java'].map(skill => (
+              {['Healthcare Ops', 'Agri Intelligence', 'Fintech Flows', 'Education Products', 'Growth Marketing', 'Python / Flask', 'React / TypeScript', 'AI Automation'].map(skill => (
                 <span key={skill} className={`px-3 py-1.5 rounded-lg border ${borderCol} text-[9px] font-mono font-bold uppercase ${textColor} opacity-60`}>{skill}</span>
               ))}
             </div>

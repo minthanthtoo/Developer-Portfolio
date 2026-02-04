@@ -9,6 +9,7 @@ const MONTH_STEP = YEAR_WIDTH / 12;
 const MONTH_NAMES = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
 const MotionDiv = motion.div as any;
+const FEATURED_PROJECT_IDS = new Set(['myango', 'myangrow', 'tb-calendar']);
 
 export const YearBlock: React.FC<{ 
   year: string; 
@@ -78,11 +79,12 @@ export const TimelineNode: React.FC<{
   const [isHovered, setIsHovered] = useState(false);
   const textColor = isLight ? 'text-slate-900' : 'text-white';
 
-  // Staggered layout based on tier
+  // Spotlight the three live product apps; keep others compact
+  const isFeatured = FEATURED_PROJECT_IDS.has(project.id);
   const isFlagship = project.tier === 'flagship';
-  const topOffset = isFlagship ? 10 : 90;
-  const iconSize = isFlagship ? 'lg' : 'md';
-  const connectorHeight = spineY - topOffset - (isFlagship ? 80 : 56);
+  const topOffset = isFeatured ? 8 : 132;
+  const iconSize = isFeatured ? 'lg' : 'sm';
+  const connectorHeight = Math.max(32, spineY - topOffset - (isFeatured ? 80 : 48));
 
   return (
     <div ref={nodeRef} className="relative flex flex-col items-center shrink-0 w-[120px] h-full">
@@ -132,10 +134,10 @@ export const TimelineNode: React.FC<{
         style={{ top: `${spineY + 16}px` }}
         className="absolute flex flex-col items-center pointer-events-none text-center w-max max-w-[140px] z-40"
       >
-        <h3 className={`text-[12px] font-serif italic tracking-tight transition-all leading-none ${isHovered ? 'opacity-100' : 'opacity-40'} ${textColor}`}>
+        <h3 className={`${isFeatured ? 'text-[13px]' : 'text-[10px]'} font-serif italic tracking-tight transition-all leading-none ${isHovered ? 'opacity-100' : 'opacity-40'} ${textColor}`}>
           {project.title}
         </h3>
-        {isFlagship && <div className="w-1 h-1 rounded-full bg-emerald-500 mt-1 opacity-40" />}
+        {(isFlagship || isFeatured) && <div className="w-1 h-1 rounded-full bg-emerald-500 mt-1 opacity-40" />}
       </div>
 
       <AnimatePresence>
