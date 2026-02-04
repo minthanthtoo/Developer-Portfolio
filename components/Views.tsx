@@ -125,10 +125,25 @@ const ProjectGridCard: React.FC<{ project: Project; isLight: boolean; onSelect: 
 };
 
 export const ProfileContent: React.FC<{ onClose: () => void; isLight: boolean }> = ({ onClose, isLight }) => {
+  const avatarSources = [
+    '/profile/min-thant-htoo.png',
+    '/profile/min-thant-htoo.jpg',
+    '/profile/min-thant-htoo.jpeg',
+    '/profile/min-thant-htoo.webp'
+  ];
+  const [avatarIndex, setAvatarIndex] = useState(0);
   const [avatarFailed, setAvatarFailed] = useState(false);
   const textColor = isLight ? 'text-slate-900' : 'text-white';
   const subTextColor = isLight ? 'text-slate-500' : 'text-white/40';
   const borderCol = isLight ? 'border-slate-300' : 'border-white/10';
+
+  const handleAvatarError = () => {
+    if (avatarIndex < avatarSources.length - 1) {
+      setAvatarIndex((prev) => prev + 1);
+      return;
+    }
+    setAvatarFailed(true);
+  };
 
   return (
     <MotionDiv 
@@ -153,10 +168,10 @@ export const ProfileContent: React.FC<{ onClose: () => void; isLight: boolean }>
             <div className={`w-full h-full rounded-2xl ${isLight ? 'bg-slate-100' : 'bg-black'} flex items-center justify-center relative overflow-hidden`}>
               {!avatarFailed ? (
                 <img
-                  src="/profile/min-thant-htoo.png"
+                  src={avatarSources[avatarIndex]}
                   alt="Min Thant Htoo"
-                  className="w-full h-full object-cover object-[center_20%]"
-                  onError={() => setAvatarFailed(true)}
+                  className="w-full h-full object-contain object-center bg-[#7c828c]"
+                  onError={handleAvatarError}
                 />
               ) : (
                 <>
@@ -171,9 +186,9 @@ export const ProfileContent: React.FC<{ onClose: () => void; isLight: boolean }>
             <div className="space-y-3">
               <h1 className={`text-4xl md:text-6xl font-black uppercase tracking-tight ${textColor}`}>Min Thant Htoo</h1>
               <div className="flex items-center justify-center md:justify-start gap-3 text-emerald-500 font-mono text-[10px] font-bold tracking-widest">
-                <span>SYSTEMS_ENGINEER</span>
+                <span>FULLSTACK_ENGINEER</span>
                 <span className="opacity-20">/</span>
-                <span>CROSS_INDUSTRY_BUILDER</span>
+                <span>MULTI_INDUSTRY + MARKETING</span>
               </div>
             </div>
             
@@ -195,7 +210,7 @@ export const ProfileContent: React.FC<{ onClose: () => void; isLight: boolean }>
               <span className={`text-[11px] font-mono font-black uppercase tracking-widest ${subTextColor}`}>CORE_LOGIC</span>
             </div>
             <ul className={`space-y-4 text-sm font-medium ${textColor}`}>
-              <li className="flex items-start gap-3 opacity-70"><span className="text-emerald-500 font-mono font-black text-[10px]">01</span> Cross-industry delivery: Medicine (TB operations), Agriculture intelligence, Fintech and Education apps</li>
+              <li className="flex items-start gap-3 opacity-70"><span className="text-emerald-500 font-mono font-black text-[10px]">01</span> Cross-industry delivery: Medicine (TB Team Calendar), Agriculture (myangrow), and Fintech/Education workflows (myango)</li>
               <li className="flex items-start gap-3 opacity-70"><span className="text-emerald-500 font-mono font-black text-[10px]">02</span> Fullstack systems thinking: secure workflows, team collaboration, sync, and AI automation</li>
               <li className="flex items-start gap-3 opacity-70"><span className="text-emerald-500 font-mono font-black text-[10px]">03</span> Past marketing background: positioning, campaign strategy, funnel optimization, and adoption</li>
             </ul>
@@ -207,7 +222,7 @@ export const ProfileContent: React.FC<{ onClose: () => void; isLight: boolean }>
               <span className={`text-[11px] font-mono font-black uppercase tracking-widest ${subTextColor}`}>TECHNOLOGY_STACK</span>
             </div>
             <div className="flex flex-wrap gap-2">
-              {['Healthcare Ops', 'Agri Intelligence', 'Fintech Flows', 'Education Products', 'Growth Marketing', 'Python / Flask', 'React / TypeScript', 'AI Automation'].map(skill => (
+              {['Medicine / TB Ops', 'Agri Intelligence', 'Fintech UX', 'Education Workflows', 'Growth Marketing', 'Python / Flask', 'React / TypeScript', 'AI Automation'].map(skill => (
                 <span key={skill} className={`px-3 py-1.5 rounded-lg border ${borderCol} text-[9px] font-mono font-bold uppercase ${textColor} opacity-60`}>{skill}</span>
               ))}
             </div>

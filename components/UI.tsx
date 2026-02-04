@@ -140,21 +140,48 @@ export const ProfileModule: React.FC<{ isLight: boolean; onClick: () => void }> 
   const textColor = isLight ? 'text-slate-900' : 'text-white';
   const subTextColor = isLight ? 'text-slate-500' : 'text-white/40';
   const borderCol = isLight ? 'border-slate-200' : 'border-white/10';
+  const avatarSources = [
+    '/profile/min-thant-htoo.png',
+    '/profile/min-thant-htoo.jpg',
+    '/profile/min-thant-htoo.jpeg',
+    '/profile/min-thant-htoo.webp'
+  ];
+  const [avatarIndex, setAvatarIndex] = useState(0);
+  const [avatarFailed, setAvatarFailed] = useState(false);
+
+  const handleAvatarError = () => {
+    if (avatarIndex < avatarSources.length - 1) {
+      setAvatarIndex((prev) => prev + 1);
+      return;
+    }
+    setAvatarFailed(true);
+  };
 
   return (
     <div onClick={onClick} className="flex items-center gap-3 sm:gap-4 cursor-pointer group">
       <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-2xl border ${borderCol} p-1 bg-gradient-to-br from-emerald-500/10 to-transparent transition-all group-hover:scale-105 group-hover:border-emerald-500/30`}>
         <div className={`w-full h-full rounded-xl ${isLight ? 'bg-slate-100' : 'bg-black'} flex items-center justify-center relative overflow-hidden`}>
-          <User size={20} className={`${isLight ? 'text-slate-300' : 'text-white/20'} group-hover:text-emerald-500 transition-colors duration-500 sm:w-6 sm:h-6`} />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-emerald-500/5 to-transparent h-full w-full animate-scan pointer-events-none" />
+          {!avatarFailed ? (
+            <img
+              src={avatarSources[avatarIndex]}
+              alt="Min Thant Htoo"
+              className="w-full h-full object-cover object-center bg-[#7c828c]"
+              onError={handleAvatarError}
+            />
+          ) : (
+            <>
+              <User size={20} className={`${isLight ? 'text-slate-300' : 'text-white/20'} group-hover:text-emerald-500 transition-colors duration-500 sm:w-6 sm:h-6`} />
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-emerald-500/5 to-transparent h-full w-full animate-scan pointer-events-none" />
+            </>
+          )}
         </div>
       </div>
       <div className="flex flex-col gap-0.5">
         <div className="flex items-center gap-1.5">
-          <h2 className={`text-sm sm:text-lg font-black uppercase tracking-tight ${textColor} group-hover:text-emerald-500 transition-colors`}>ALEX_NEXUS</h2>
+          <h2 className={`text-sm sm:text-lg font-black uppercase tracking-tight ${textColor} group-hover:text-emerald-500 transition-colors`}>MIN THANT HTOO</h2>
           <ShieldCheck size={10} className="text-emerald-500 sm:w-3 sm:h-3" />
         </div>
-        <span className={`text-[7px] sm:text-[8px] font-mono font-black uppercase tracking-widest ${subTextColor}`}>PRINCIPAL_ARCHITECT</span>
+        <span className={`text-[7px] sm:text-[8px] font-mono font-black uppercase tracking-widest ${subTextColor}`}>FULLSTACK_ENGINEER_X_MARKETING</span>
       </div>
     </div>
   );
